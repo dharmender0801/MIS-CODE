@@ -81,14 +81,14 @@ public class CreateExcel {
 					fillExcel(sheet, qui2play, workbook);
 				}
 			}
-
 		}
 
-		FileOutputStream out = new FileOutputStream(new File("D://VendorWap.xlsx"));
+//		FileOutputStream out = new FileOutputStream(new File("D://VendorWap.xlsx"));
+		FileOutputStream out = new FileOutputStream(new File("/usr/shfiles/quiz2play_mis/zain_iq/VendorWap.xlsx"));
 
 		workbook.write(out);
 		out.close();
-		System.out.println("Excel file written successfully on disk.");
+		System.out.println("Vendor Excel file written successfully on disk. on Path  /usr/shfiles/quiz2play_mis/zain_iq/VendorWap.xlsx");
 
 	}
 

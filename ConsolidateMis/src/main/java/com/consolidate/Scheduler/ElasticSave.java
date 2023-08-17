@@ -1,6 +1,7 @@
 package com.consolidate.Scheduler;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -24,6 +25,7 @@ import com.consolidate.Model.count;
 import com.consolidate.Repository.CallbackModelRepos;
 import com.consolidate.Repository.CountryRepos;
 import com.consolidate.Repository.MisRepos;
+import com.consolidate.service.consolidateService;
 
 @Component
 public class ElasticSave {
@@ -33,6 +35,9 @@ public class ElasticSave {
 
 	@Autowired
 	private CountryRepos countryRepos;
+	
+	@Autowired
+	private consolidateService misService;
 
 	@Autowired
 	private MisRepos misRepos;
@@ -41,66 +46,69 @@ public class ElasticSave {
 	private String hitquery;
 
 //	@Scheduled(fixedDelay = 10000)
-	public void shdeuling() {
+	@Scheduled(cron = "0 0 3 * * *")
+	public void shdeuling() throws IOException {
 //		misRepos.deleteAll();
-		for (int i = 4; i > 0; i--) {
+//		for (int i = 3; i > 0; i--) {
 
-		List<Country> list = countryRepos.findAll();
-		for (Country col : list) {
-			String query = hitquery;
-			LocalDate currentDate = LocalDate.now();
-			LocalDate previousDate = currentDate.minusDays(i);
-			System.out.println(previousDate);
-			query = query.replace("2023-05-11", previousDate.toString());
-			query = query.replace("1006,1007", col.getProductIds());
-			List<count> countList = jdbcTemplate.query(query,
-					(rs, rowNum) -> new count(rs.getString(1), rs.getString(2), rs.getString(3)));
-			for (count li : countList) {
+			List<Country> list = countryRepos.findAll();
+			for (Country col : list) {
+				String query = hitquery;
+				LocalDate currentDate = LocalDate.now();
+				LocalDate previousDate = currentDate.minusDays(1);
+				System.out.println(previousDate);
+				query = query.replace("2023-05-11", previousDate.toString());
+				query = query.replace("1006,1007", col.getProductIds());
+				List<count> countList = jdbcTemplate.query(query,
+						(rs, rowNum) -> new count(rs.getString(1), rs.getString(2), rs.getString(3)));
+				for (count li : countList) {
 
-				try {
+					try {
 
-					String subquery = "SELECT COUNT(*) FROM `appstore_users_subscription`  WHERE DATE(subscription_date)='"
-							+ previousDate + "' AND adv_id='" + li.getCpId() + "'" + "";
+						String subquery = "SELECT COUNT(*) FROM `appstore_users_subscription`  WHERE DATE(subscription_date)='"
+								+ previousDate + "' AND adv_id='" + li.getCpId() + "'" + "";
 
-					String unsub = "SELECT COUNT(*) FROM `appstore_users_subscription_history`  WHERE DATE(subscription_date)='"
-							+ previousDate + "' AND adv_id='" + li.getCpId() + "'" + "";
+						String unsub = "SELECT COUNT(*) FROM `appstore_users_subscription_history`  WHERE DATE(subscription_date)='"
+								+ previousDate + "' AND adv_id='" + li.getCpId() + "'" + "";
 
-					String samedayBilledquery = "SELECT COUNT(*) FROM `appstore_users_subscription`  WHERE DATE(subscription_date)='"
-							+ previousDate + "'" + " AND DATE(charge_date)='" + previousDate + "' AND adv_id='"
-							+ li.getCpId() + "'";
-					String pstbk = "SELECT COUNT(*) FROM `quiz2play_callback_vendor` " + " WHERE cp_id='" + li.getCpId()
-							+ "' AND DATE(date_time)='" + previousDate + "'  AND callback_status='1' ";
-					String vend = "SELECT vendor_name FROM `quiz2play_vendor_detail` WHERE cp_id ='" + li.getCpId()
-							+ "'";
-					int unsubcount = jdbcTemplate.queryForObject(unsub, int.class);
-					int subcount = jdbcTemplate.queryForObject(subquery, int.class);
-					int samDaybilledCount = jdbcTemplate.queryForObject(samedayBilledquery, int.class);
-					int postback = jdbcTemplate.queryForObject(pstbk, int.class);
-					String vendName = jdbcTemplate.queryForObject(vend, String.class);
-					MisColumn column = new MisColumn();
-					column.setCountryName(col.getCountryName());
-					column.setCpId(li.getCpId());
-					column.setOperatorName(col.getOperatorName());
-					column.setProcessDate(previousDate);
-					column.setVendorName(vendName);
-					column.setActivation(String.valueOf(subcount + unsubcount));
-					column.setPostbackSent(String.valueOf(postback));
-					column.setSameDayBilled(String.valueOf(samDaybilledCount));
-					column.setTotalHits(li.getCount());
-					column.setUniqueHits(li.getDistinctcount());
-					misRepos.save(column);
-				} catch (EmptyResultDataAccessException e) {
-					// handle the exception gracefully, e.g. by logging the error or showing a
-					// user-friendly message
-					System.out.println("No result found for the given query.");
+						String samedayBilledquery = "SELECT COUNT(*) FROM `appstore_users_subscription`  WHERE DATE(subscription_date)='"
+								+ previousDate + "'" + " AND DATE(charge_date)='" + previousDate + "' AND adv_id='"
+								+ li.getCpId() + "'";
+						String pstbk = "SELECT COUNT(*) FROM `quiz2play_callback_vendor` " + " WHERE cp_id='"
+								+ li.getCpId() + "' AND DATE(date_time)='" + previousDate
+								+ "'  AND callback_status='1' ";
+						String vend = "SELECT vendor_name FROM `quiz2play_vendor_detail` WHERE cp_id ='" + li.getCpId()
+								+ "'";
+						int unsubcount = jdbcTemplate.queryForObject(unsub, int.class);
+						int subcount = jdbcTemplate.queryForObject(subquery, int.class);
+						int samDaybilledCount = jdbcTemplate.queryForObject(samedayBilledquery, int.class);
+						int postback = jdbcTemplate.queryForObject(pstbk, int.class);
+						String vendName = jdbcTemplate.queryForObject(vend, String.class);
+						MisColumn column = new MisColumn();
+						column.setCountryName(col.getCountryName());
+						column.setCpId(li.getCpId());
+						column.setOperatorName(col.getOperatorName());
+						column.setProcessDate(previousDate);
+						column.setVendorName(vendName);
+						column.setActivation(String.valueOf(subcount + unsubcount));
+						column.setPostbackSent(String.valueOf(postback));
+						column.setSameDayBilled(String.valueOf(samDaybilledCount));
+						column.setTotalHits(li.getCount());
+						column.setUniqueHits(li.getDistinctcount());
+						misRepos.save(column);
+					} catch (EmptyResultDataAccessException e) {
+						// handle the exception gracefully, e.g. by logging the error or showing a
+						// user-friendly message
+						System.out.println("No result found for the given query.");
+					}
+
 				}
 
-			}
-
-			}
+//			}
 		}
 
 		System.out.println("Done All is ");
+		misService.getMis();
 
 	}
 

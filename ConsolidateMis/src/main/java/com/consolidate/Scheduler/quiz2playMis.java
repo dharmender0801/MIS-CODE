@@ -31,7 +31,7 @@ public class quiz2playMis {
 	@Autowired
 	private consolidateService consolidateService;
 
-//	@Scheduled(cron = "0 0 4 * * *")
+	@Scheduled(cron = "0 0 4 * * *")
 //	@Scheduled(fixedDelay = 10000)
 	public void quiz2plaMis() throws IOException {
 		LocalDate currentDate = LocalDate.now();
