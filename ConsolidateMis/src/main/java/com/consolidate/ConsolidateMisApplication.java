@@ -10,6 +10,7 @@ public class ConsolidateMisApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ConsolidateMisApplication.class, args);
+		System.out.println("Project Started");
 	}
 
 }
