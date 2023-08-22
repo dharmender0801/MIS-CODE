@@ -67,7 +67,7 @@ public class CreateExcel {
 		return sheet;
 	}
 
-	public void CreateExcelSheet(List<Country> list, Map<String, List<MisColumn>> maplist) throws IOException {
+	public String CreateExcelSheet(List<Country> list, Map<String, List<MisColumn>> maplist) throws IOException {
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		XSSFSheet summarySheet;
@@ -88,8 +88,9 @@ public class CreateExcel {
 
 		workbook.write(out);
 		out.close();
-		System.out.println("Vendor Excel file written successfully on disk. on Path  /usr/shfiles/quiz2play_mis/zain_iq/VendorWap.xlsx");
-
+		System.out.println(
+				"Vendor Excel file written successfully on disk. on Path  /usr/shfiles/quiz2play_mis/zain_iq/VendorWap.xlsx");
+		return "/usr/shfiles/quiz2play_mis/zain_iq/VendorWap.xlsx";
 	}
 
 	private static Map<String, Object[]> CreateTable(List<MisColumn> list) {

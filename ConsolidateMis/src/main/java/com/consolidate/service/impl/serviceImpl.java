@@ -20,6 +20,7 @@ import com.consolidate.Repository.q2pdailyMisRepos;
 import com.consolidate.excel.CreateExcel;
 import com.consolidate.excel.MisExcel;
 import com.consolidate.service.consolidateService;
+import com.consolidate.util.independentMailler;
 import com.consolidate.util.sendEmail;
 
 @Service
@@ -46,8 +47,8 @@ public class serviceImpl implements consolidateService {
 			maplist.put(coun.getOperatorName(), MisList);
 		}
 		CreateExcel createExcel = new CreateExcel();
-		createExcel.CreateExcelSheet(list, maplist);
-
+		String path  = createExcel.CreateExcelSheet(list, maplist);
+		independentMailler.sendEmailer("/home/mailer1.txt", "Please find attached vendor wap for QUIZ2PLAY", path);
 		return maplist;
 
 	}
