@@ -20,26 +20,29 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.consolidate.Model.Country;
 import com.consolidate.Model.Quiz2playMisModel;
-import com.consolidate.Repository.CountryRepos;
 
 @Component
 public class sendEmail {
+	static double newActRev = 0;
+	static double RenActRev = 0;
+	static double totalRevAtpl = 0;
+	static double grossRev = 0;
+	static double totalMtd = 0;
+	static double grossMtd = 0;
 
 	public static void sendEmailer(Map<String, List<Quiz2playMisModel>> oneDay) {
 		try {
-			 System.out.println(" mail send started...");
+			System.out.println(" mail send started...");
 			final String from = "mis@info2cell.com";
-		final File file = new File("/home/mailer.txt");
-		Scanner sc = new Scanner(file);
-		String to = "";
-		while (sc.hasNextLine()) {
-			to = to + sc.nextLine();
-		}
+			final File file = new File("/home/mailer.txt");
+			Scanner sc = new Scanner(file);
+			String to = "";
+			while (sc.hasNextLine()) {
+				to = to + sc.nextLine();
+			}
 
 //			String to = "dharmender.kumar@altruistindia.com";
 
@@ -72,22 +75,44 @@ public class sendEmail {
 			message.setSubject("Quiz2Play MIS Report");
 			BodyPart messageBodyPart = (BodyPart) new MimeBodyPart();
 			final String msg = "<html><i>Dear All,</i><br><br><b>Please find below the snapshot ::-</b><br>";
-			final String table = "<table border=1 bordercolor=Black border=1 cellpadding=0 cellspacing=0 style=\"width:1000px\"> <tr bgcolor=\"#98FB98\"><td style=\"width:45%;text-align=center;padding:10px\"><b>DATE</b><td style=\"width:50%;text-align=center;padding:10px\">Operator Name</td><td style=\"width:50%;text-align=center;padding:10px\">Active Base</td><td style=\"width:50%;text-align=center;padding:10px\">New Subscription</td><td style=\"width:50%;text-align=center;padding:10px\">Billed Activation</td><td style=\"width:50%;text-align=center;padding:10px\">New Billed Activation</td><td style=\"width:50%;text-align=center;padding:10px\">Renewal Activation</td><td style=\"width:50%;text-align=center;padding:10px\">Churn Count</td><td style=\"width:50%;text-align=center;padding:10px\">Invol Churn</td><td style=\"width:50%;text-align=center;padding:10px\">Vol Churn</td><td style=\"width:50%;text-align=center;padding:10px\">New Activation Revenue</td><td style=\"width:50%;text-align=center;padding:10px\">Renewal Revenue</td><td style=\"width:50%;text-align=center;padding:10px\">Total Revenue</td><td style=\"width:50%;text-align=center;padding:10px\">Mtd</td></tr>";
+			final String table = "<table border=1 bordercolor=Black border=1 cellpadding=0 "
+					+ "cellspacing=0 style=\"width:1000px\"> <tr bgcolor=\"#98FB98\">"
+					+ "<td style=\"width:45%;text-align=center;padding:10px\"><b>DATE</b>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Operator Name</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Active Base</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">New Subscription</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Billed Activation</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">New Billed Activation</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Renewal Activation</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Churn Count</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Invol Churn</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Vol Churn</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">New Activation Revenue</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Renewal Revenue</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Total Revenue(ATPL share)</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Gross Revenue</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Mtd (ATPL share)</td>"
+					+ "<td style=\"width:50%;text-align=center;padding:10px\">Gross Mtd</td>" +
+
+					"</tr>";
 			String body = "";
 			StringBuilder bodyContent = new StringBuilder();
 			for (Map.Entry<String, List<Quiz2playMisModel>> data : oneDay.entrySet()) {
 				body = createall(data.getValue(), body);
 				bodyContent.append(body);
 			}
-
-			messageBodyPart.setContent(msg + "<br>" + table + bodyContent + "</table>",
-					"text/html");
+			body = "<td align=center colspan=\"10\">Total</td><td align=center>" + newActRev + "</td>"
+					+ "<td align=center>" + RenActRev + "</td>" + "<td align=center>" + totalRevAtpl
+					+ "</td><td align=center>" + grossRev + "</td>" + "<td align=center>" + totalMtd + "</td>"
+					+ "<td align=center>" + grossMtd + "</td>" + "</tr>";
+			bodyContent.append(body);
+			messageBodyPart.setContent(msg + "<br>" + table + bodyContent + "</table>", "text/html");
 
 			final Multipart multipart = (Multipart) new MimeMultipart();
 			multipart.addBodyPart(messageBodyPart);
 			messageBodyPart = (BodyPart) new MimeBodyPart();
 			final String filename = "/usr/shfiles/quiz2play_mis/zain_iq/Report.xlsx";
-//			final String filename = "C://Users/teams/Downloads/Reports.xlsx";
+//			final String filename = "D://Reports.xlsx";
 
 			final DataSource source = (DataSource) new FileDataSource(filename);
 			messageBodyPart.setDataHandler(new DataHandler(source));
@@ -128,7 +153,12 @@ public class sendEmail {
 		String body = "";
 		for (int i = 0; i < list.size(); ++i) {
 			final Quiz2playMisModel mrb = list.get(i);
-
+			newActRev += Double.valueOf(mrb.getNewActivationRevenue());
+			RenActRev += Double.valueOf(mrb.getRenewalRevenue());
+			totalRevAtpl += Double.valueOf(mrb.getTotalRevenue());
+			totalMtd += Double.valueOf(mrb.getMtd());
+			grossMtd += Double.valueOf(mrb.getGrossMtd());
+			grossRev += Double.valueOf(mrb.getTotalRevenuelc());
 			body = body + "<tr style=\"width:1200px\"><td bgcolor=\"#98FB98\">" + mrb.getDate() + "</td>"
 
 					+ "<td align=center>" + mrb.getOperatorName() + "</td>" + "<td align=center>" + mrb.getActiveBase()
@@ -138,9 +168,11 @@ public class sendEmail {
 					+ mrb.getChurnCount() + "</td>" + "<td align=center>" + mrb.getInvolChurn() + "</td>"
 					+ "<td align=center>" + mrb.getVolChurn() + "<td align=center>" + mrb.getNewActivationRevenue()
 					+ "</td>" + "<td align=center>" + mrb.getRenewalRevenue() + "</td>" + "<td align=center>"
-					+ mrb.getTotalRevenue() + "</td>" + "<td align=center>" + mrb.getMtd() + "</td></tr>";
+					+ mrb.getTotalRevenue() + "</td>" + "<td align=center>" + mrb.getTotalRevenuelc() + "</td>"
+					+ "<td align=center>" + mrb.getMtd() + "</td><td align=center>" + mrb.getGrossMtd() + "</td></tr>";
 
 		}
+
 		return body;
 
 	}

@@ -24,10 +24,8 @@ import com.consolidate.Model.Quiz2playMisModel;
 
 public class MisExcel {
 
-	
-	
-	
-	public static void CreateExcelSheet(List<Country> list, Map<String, List<Quiz2playMisModel>> maplist) throws IOException {
+	public static void CreateExcelSheet(List<Country> list, Map<String, List<Quiz2playMisModel>> maplist)
+			throws IOException {
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		XSSFSheet summarySheet;
@@ -44,13 +42,14 @@ public class MisExcel {
 
 		}
 
-//		FileOutputStream out = new FileOutputStream(new File("C://Users/teams/Downloads/Reports.xlsx"));
+//		FileOutputStream out = new FileOutputStream(new File("D://Reports.xlsx"));
 		FileOutputStream out = new FileOutputStream(new File("/usr/shfiles/quiz2play_mis/zain_iq/Report.xlsx"));
 
 		workbook.write(out);
 		out.close();
 		System.out.println("Excel file written successfully on disk.");
 	}
+
 	private static Map<String, Object[]> CreateTable(List<Quiz2playMisModel> list) {
 		// TODO Auto-generated method stub
 		Map<String, Object[]> data = new LinkedHashMap<String, Object[]>();
@@ -58,21 +57,22 @@ public class MisExcel {
 		data.put("0",
 				new Object[] { "Date", " Operator Name", "Active Base", "New Subscription", "Billed Activation",
 						"New Billed Activation", "Renewal Activation", "Churn Count", "Invol Churn", "Vol Churn",
-						"New Activation Revenue", "Renewal Revenue", "Total Revenue", "Mtd" });
+						"New Activation Revenue", "Renewal Revenue", "Total Revenue (ATPL Share)", "Gross Revenue",
+						"Mtd", "Gross Mtd" });
 
 		for (int i = 0; i < list.size(); i++) {
 			Quiz2playMisModel mrb = list.get(i);
 			data.put(Integer.toString(sno),
-					new Object[] { mrb.getDate().toString(), mrb.getOperatorName(), mrb.getActiveBase(), mrb.getNewSubscription(),
-							mrb.getBilledActivation(), mrb.getNewBilledActivation(), mrb.getRenewalActivation(),
-							mrb.getChurnCount(), mrb.getInvolChurn(), mrb.getVolChurn(), mrb.getNewActivationRevenue(),
-							mrb.getRenewalRevenue(), mrb.getTotalRevenue(), mrb.getMtd() });
+					new Object[] { mrb.getDate().toString(), mrb.getOperatorName(), mrb.getActiveBase(),
+							mrb.getNewSubscription(), mrb.getBilledActivation(), mrb.getNewBilledActivation(),
+							mrb.getRenewalActivation(), mrb.getChurnCount(), mrb.getInvolChurn(), mrb.getVolChurn(),
+							mrb.getNewActivationRevenue(), mrb.getRenewalRevenue(), mrb.getTotalRevenue(),
+							mrb.getTotalRevenuelc(), mrb.getMtd(), mrb.getGrossMtd() });
 			sno++;
 		}
 		return data;
 	}
-	
-	
+
 	private static void fillExcel(XSSFSheet sheet, Map<String, Object[]> data, XSSFWorkbook workbook) {
 		Set<String> keyset = data.keySet();
 		int rownum = 0;
@@ -129,5 +129,5 @@ public class MisExcel {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

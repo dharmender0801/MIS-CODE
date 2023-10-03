@@ -56,6 +56,9 @@ public class Quiz2playMisModel {
 	private String totalRevenue;
 	@Column
 	private String mtd;
-	
+	@Column
+	private String totalRevenuelc;
+	@Column
+	private String grossMtd;
 
 }

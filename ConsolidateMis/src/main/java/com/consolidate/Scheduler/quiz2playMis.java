@@ -78,10 +78,16 @@ public class quiz2playMis {
 				+ "))),0)  from tbl_billing_success " + "where date(process_datetime)='" + previousDate
 				+ "' and product_id in (" + col.getProductIds() + ")";
 		String MtdRevQ = "select ifnull(round((" + col.getNet() + "*(SUM(deducted_amount)" + col.getConversionRate()
-				+ "))),0)  from tbl_billing_success where month(date_time)='" + month + "' and product_id in ("
-				+ col.getProductIds() + ");";
+				+ "))),0)  from tbl_billing_success where month(date_time)='" + month
+				+ "'and year(date_time)=year(now()) and product_id in (" + col.getProductIds() + ");";
 		String samDayunsubQ = "SELECT COUNT(1) FROM appstore_users_subscription_history WHERE  product_id IN ("
 				+ col.getProductIds() + ") AND DATE(subscription_date) = '" + previousDate + "'";
+		String lcRev = "SELECT SUM(deducted_amount)" + col.getConversionRate()
+				+ "  FROM `tbl_billing_success` WHERE DATE(date_time)= '" + previousDate + "' AND product_id in ("
+				+ col.getProductIds() + ") ";
+		String grossMtd = "select ifnull(round((SUM(deducted_amount)" + col.getConversionRate()
+				+ ")),0)  from tbl_billing_success where month(date_time)='" + month + "'"
+				+ " AND YEAR(date_time)= YEAR(NOW()) and product_id in (" + col.getProductIds() + ")";
 
 		String activebase = jdbcTemplate.queryForObject(activebaseQ, String.class);
 		int newSub = jdbcTemplate.queryForObject(newsubQ, int.class);
@@ -94,16 +100,32 @@ public class quiz2playMis {
 		String TotaRev = jdbcTemplate.queryForObject(TotalRevQ, String.class);
 		String MtdRev = jdbcTemplate.queryForObject(MtdRevQ, String.class);
 		int SameDayUnsub = jdbcTemplate.queryForObject(samDayunsubQ, int.class);
+		Double lcRevn = jdbcTemplate.queryForObject(lcRev, Double.class);
 		String sub = String.valueOf(SameDayUnsub + newSub);
+		String grossMtdRev = jdbcTemplate.queryForObject(grossMtd, String.class);
+		if (grossMtdRev == null) {
+			grossMtdRev = "0";
+		}
 		saveTOMisTable(activebase, newActRev, sub, BilledAct, newBilled, RenAct, Volchurn, RenRev, TotaRev, MtdRev, col,
-				previousDate);
+				previousDate, String.valueOf(lcRevn), grossMtdRev);
 
 	}
 
 	private void saveTOMisTable(String activebase, String newActRev, String sub, String billedAct, String newBilled,
 			String renAct, String volchurn, String renRev, String totaRev, String mtdRev, Country col,
-			LocalDate previousDate) {
+			LocalDate previousDate, String lcRevn, String grossMtdRev) {
 		// TODO Auto-generated method stub
+		String firstTwoDigits = null;
+		int decimalIndex = lcRevn.indexOf('.');
+		if (decimalIndex != -1) {
+			if (decimalIndex + 3 < lcRevn.length()) {
+				firstTwoDigits = lcRevn.substring(0, decimalIndex + 3);
+			} else {
+				firstTwoDigits = lcRevn;
+			}
+		} else {
+			firstTwoDigits = lcRevn;
+		}
 		Quiz2playMisModel misModel = new Quiz2playMisModel();
 		misModel.setActiveBase(activebase);
 		misModel.setBilledActivation(billedAct);
@@ -122,6 +144,8 @@ public class quiz2playMis {
 		misModel.setRenewalActivation(renAct);
 		misModel.setVolChurn(volchurn);
 		misModel.setNewBilledActivation(newBilled);
+		misModel.setTotalRevenuelc(firstTwoDigits);
+		misModel.setGrossMtd(grossMtdRev);
 		misRepos.save(misModel);
 
 	}
